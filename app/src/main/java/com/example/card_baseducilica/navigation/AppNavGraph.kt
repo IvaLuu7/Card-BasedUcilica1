@@ -1,30 +1,34 @@
 package com.example.card_baseducilica.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.card_baseducilica.ui.LoginScreen
-import com.example.card_baseducilica.ui.RegisterScreen
-import com.example.card_baseducilica.ui.MySetsScreen
-import com.example.card_baseducilica.ui.CardsScreen
+import com.example.card_baseducilica.ui.*
+import com.example.card_baseducilica.viewmodel.LearningViewModel
 
 object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val SETS = "sets"
-
     const val CARDS_ROUTE = "cards"
+    const val LEARNING = "learning"
+    const val RESULT = "result"
 }
 
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
+    val learningViewModel: LearningViewModel =
+        androidx.lifecycle.viewmodel.compose.viewModel()
 
     NavHost(
         navController = navController,
         startDestination = Routes.LOGIN
     ) {
+
         composable(Routes.LOGIN) {
             LoginScreen(
                 onRegisterClick = {
@@ -51,7 +55,7 @@ fun AppNavGraph() {
         }
 
         composable(
-            route = "${Routes.CARDS_ROUTE}/{setId}/{setTitle}",
+            route = "${Routes.CARDS_ROUTE}/{setId}/{setTitle}"
         ) { backStackEntry ->
 
             val setId = backStackEntry.arguments
@@ -62,8 +66,42 @@ fun AppNavGraph() {
                 ?.getString("setTitle") ?: ""
 
             CardsScreen(
+                navController = navController,
                 setId = setId,
                 setTitle = setTitle
+            )
+        }
+
+        composable(
+            route = "${Routes.LEARNING}/{setId}/{setTitle}"
+        ) { backStackEntry ->
+
+            val setId = backStackEntry.arguments
+                ?.getString("setId")
+                ?.toIntOrNull() ?: return@composable
+
+            val setTitle = backStackEntry.arguments
+                ?.getString("setTitle") ?: ""
+
+            LearningScreen(
+                setId = setId,
+                setTitle = setTitle,
+                viewModel = learningViewModel,
+                onFinished = {
+                    navController.navigate(Routes.RESULT)
+                }
+            )
+        }
+
+        composable(Routes.RESULT) {
+
+            LearningResultScreen(
+                viewModel = learningViewModel,
+                onBackToSets = {
+                    navController.navigate(Routes.SETS) {
+                        popUpTo(Routes.SETS) { inclusive = true }
+                    }
+                }
             )
         }
     }

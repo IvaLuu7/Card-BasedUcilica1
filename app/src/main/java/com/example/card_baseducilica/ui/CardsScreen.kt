@@ -11,9 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.card_baseducilica.viewmodel.CardViewModel
+import androidx.navigation.NavController
+import com.example.card_baseducilica.navigation.Routes
 
 @Composable
 fun CardsScreen(
+    navController: NavController,
     setId: Int,
     setTitle: String,
     cardViewModel: CardViewModel = viewModel()
@@ -48,6 +51,20 @@ fun CardsScreen(
         ) {
             Text("+ Dodaj karticu")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                navController.navigate(
+                    "${Routes.LEARNING}/${setId}/${setTitle}"
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Uči ▶")
+        }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
