@@ -31,14 +31,20 @@ class LearningViewModel(application: Application) : AndroidViewModel(application
     private val _finished = MutableStateFlow(false)
     val finished: StateFlow<Boolean> = _finished
 
-    fun startLearning(setId: Int) {
+    fun startLearning(setId: Int, onlyFavorites: Boolean) {
         viewModelScope.launch {
-            _cards.value = cardDao.getCardsForSet(setId)
+            _cards.value =
+                if (onlyFavorites) {
+                    cardDao.getFavoriteCardsForSet(setId)
+                } else {
+                    cardDao.getCardsForSet(setId)
+                }
+
             _currentIndex.value = 0
-            _showAnswer.value = false
             _knownCount.value = 0
             _unknownCount.value = 0
-            _finished.value = false
+            _showAnswer.value = false
+            _finished.value = _cards.value.isEmpty()
         }
     }
 
@@ -57,7 +63,7 @@ class LearningViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun moveNext() {
-        if (_currentIndex.value == _cards.value.lastIndex) {
+        if (_currentIndex.value >= _cards.value.lastIndex) {
             _finished.value = true
         } else {
             _currentIndex.value++

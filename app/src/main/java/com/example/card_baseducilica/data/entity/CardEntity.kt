@@ -21,5 +21,7 @@ data class CardEntity(
 
     val setId: Int,
     val question: String,
-    val answer: String
+    val answer: String,
+
+    val isFavorite: Boolean = false
 )

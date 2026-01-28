@@ -9,19 +9,28 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.card_baseducilica.viewmodel.AuthViewModel
-import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun LoginScreen(
     onRegisterClick: () -> Unit,
     onLoginSuccess: () -> Unit,
     authViewModel: AuthViewModel = viewModel()
-){
+) {
     val error by authViewModel.error.collectAsState()
     val loginSuccess by authViewModel.loginSuccess.collectAsState()
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        authViewModel.checkSession()
+    }
+
+    LaunchedEffect(loginSuccess) {
+        if (loginSuccess) {
+            onLoginSuccess()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -62,7 +71,6 @@ fun LoginScreen(
         Button(
             onClick = {
                 authViewModel.login(username, password)
-
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -71,9 +79,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        TextButton(
-            onClick = onRegisterClick
-        ) {
+        TextButton(onClick = onRegisterClick) {
             Text("REGISTRACIJA")
         }
 
@@ -83,12 +89,6 @@ fun LoginScreen(
                 text = error ?: "",
                 color = MaterialTheme.colorScheme.error
             )
-        }
-    }
-
-    LaunchedEffect(loginSuccess) {
-        if (loginSuccess) {
-            onLoginSuccess()
         }
     }
 }

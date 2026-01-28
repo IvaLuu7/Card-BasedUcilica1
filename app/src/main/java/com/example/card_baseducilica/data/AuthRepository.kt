@@ -36,7 +36,7 @@ class AuthRepository(
         userDao.insert(user)
     }
 
-    suspend fun login(username: String, password: String): UserEntity {
+    suspend fun login(username: String, password: String): Int {
         if (username.isBlank() || password.isBlank()) {
             throw IllegalArgumentException("Unesite korisničko ime i lozinku")
         }
@@ -49,6 +49,6 @@ class AuthRepository(
             throw IllegalArgumentException("Pogrešno korisničko ime ili lozinka")
         }
 
-        return user
+        return user.id
     }
 }

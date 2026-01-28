@@ -5,11 +5,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.card_baseducilica.data.AppDatabase
 import com.example.card_baseducilica.data.AuthRepository
+import com.example.card_baseducilica.data.session.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val sessionManager = SessionManager(application)
 
     private val userDao = AppDatabase
         .getInstance(application)
@@ -26,12 +29,13 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun login(username: String, password: String) {
         viewModelScope.launch {
             try {
-                authRepository.login(username, password)
-                _error.value = null
+                val userId: Int = authRepository.login(username, password)
+
+                sessionManager.saveUserId(userId)
+
                 _loginSuccess.value = true
-            } catch (e: IllegalArgumentException) {
+            } catch (e: Exception) {
                 _error.value = e.message
-                _loginSuccess.value = false
             }
         }
     }
@@ -49,5 +53,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 _error.value = e.message
             }
         }
+    }
+
+    fun checkSession() {
+        val userId = sessionManager.getUserId()
+        _loginSuccess.value = userId != null
     }
 }

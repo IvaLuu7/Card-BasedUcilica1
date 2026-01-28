@@ -5,14 +5,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.card_baseducilica.viewmodel.CardViewModel
 import androidx.navigation.NavController
 import com.example.card_baseducilica.navigation.Routes
+import com.example.card_baseducilica.viewmodel.CardViewModel
 
 @Composable
 fun CardsScreen(
@@ -21,6 +24,7 @@ fun CardsScreen(
     setTitle: String,
     cardViewModel: CardViewModel = viewModel()
 ) {
+    val showOnlyFavorites by cardViewModel.showOnlyFavorites.collectAsState()
     val cards by cardViewModel.cards.collectAsState()
 
     var showDialog by remember { mutableStateOf(false) }
@@ -57,14 +61,34 @@ fun CardsScreen(
         Button(
             onClick = {
                 navController.navigate(
-                    "${Routes.LEARNING}/${setId}/${setTitle}"
+                    "${Routes.LEARNING}/$setId/$setTitle/$showOnlyFavorites"
                 )
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Uči ▶")
+            Text(
+                if (showOnlyFavorites)
+                    "Uči samo favorite"
+                else
+                    "Uči sve kartice"
+            )
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = {
+                cardViewModel.toggleFavoriteFilter(setId)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                if (showOnlyFavorites)
+                    "Prikaži sve kartice"
+                else
+                    "Prikaži samo favorite"
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -82,14 +106,27 @@ fun CardsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(
+
+                            Text(
+                                text = card.question,
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.weight(1f)
+                            )
+
+                            IconButton(
+                                onClick = {
+                                    cardViewModel.toggleFavorite(card)
+                                }
                             ) {
-                                Text(
-                                    text = card.question,
-                                    style = MaterialTheme.typography.titleMedium
+                                Icon(
+                                    imageVector = if (card.isFavorite)
+                                        Icons.Filled.Favorite
+                                    else
+                                        Icons.Filled.FavoriteBorder,
+                                    contentDescription = "Favorit"
                                 )
                             }
 

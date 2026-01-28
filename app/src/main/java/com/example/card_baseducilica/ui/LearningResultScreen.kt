@@ -17,13 +17,14 @@ fun LearningResultScreen(
     val unknown by viewModel.unknownCount.collectAsState()
 
     val total = known + unknown
-    val percentage =
+    val percent =
         if (total == 0) 0 else (known * 100) / total
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -32,13 +33,13 @@ fun LearningResultScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Znam: $known")
+        Text("Ne znam: $unknown")
+        Text("Uspješnost: $percent %")
+
         Spacer(modifier = Modifier.height(24.dp))
-
-        Text("Broj točnih (znam): $known")
-        Text("Broj netočnih (ne znam): $unknown")
-        Text("Uspješnost: $percentage%")
-
-        Spacer(modifier = Modifier.height(32.dp))
 
         Button(onClick = onBackToSets) {
             Text("Povratak na setove")

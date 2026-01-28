@@ -73,7 +73,7 @@ fun AppNavGraph() {
         }
 
         composable(
-            route = "${Routes.LEARNING}/{setId}/{setTitle}"
+            route = "${Routes.LEARNING}/{setId}/{setTitle}/{onlyFavorites}"
         ) { backStackEntry ->
 
             val setId = backStackEntry.arguments
@@ -83,17 +83,33 @@ fun AppNavGraph() {
             val setTitle = backStackEntry.arguments
                 ?.getString("setTitle") ?: ""
 
+            val onlyFavorites = backStackEntry.arguments
+                ?.getString("onlyFavorites")
+                ?.toBooleanStrictOrNull() ?: false
+
             LearningScreen(
                 setId = setId,
                 setTitle = setTitle,
-                viewModel = learningViewModel,
+                onlyFavorites = onlyFavorites,
                 onFinished = {
                     navController.navigate(Routes.RESULT)
+                },
+                onCancel = {
+                    navController.popBackStack(Routes.SETS, false)
                 }
             )
         }
 
-        composable(Routes.RESULT) {
+        composable(Routes.RESULT) { backStackEntry ->
+
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(
+                    "${Routes.LEARNING}/{setId}/{setTitle}/{onlyFavorites}"
+                )
+            }
+
+            val learningViewModel: LearningViewModel =
+                androidx.lifecycle.viewmodel.compose.viewModel(parentEntry)
 
             LearningResultScreen(
                 viewModel = learningViewModel,

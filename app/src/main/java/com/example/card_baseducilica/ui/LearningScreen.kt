@@ -7,22 +7,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.card_baseducilica.viewmodel.LearningViewModel
 
 @Composable
 fun LearningScreen(
     setId: Int,
     setTitle: String,
-    viewModel: LearningViewModel,
-    onFinished: () -> Unit
+    onlyFavorites: Boolean,
+    onFinished: () -> Unit,
+    onCancel: () -> Unit,
+    viewModel: LearningViewModel = viewModel()
 ) {
     val cards by viewModel.cards.collectAsState()
-    val index by viewModel.currentIndex.collectAsState()
+    val currentIndex by viewModel.currentIndex.collectAsState()
     val showAnswer by viewModel.showAnswer.collectAsState()
     val finished by viewModel.finished.collectAsState()
 
-    LaunchedEffect(setId) {
-        viewModel.startLearning(setId)
+    var showCancelDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(setId, onlyFavorites) {
+        viewModel.startLearning(setId, onlyFavorites)
     }
 
     LaunchedEffect(finished) {
@@ -32,48 +37,93 @@ fun LearningScreen(
     }
 
     if (cards.isEmpty()) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Nema kartica u ovom setu.")
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Nema kartica za učenje.")
         }
         return
     }
 
-    val card = cards[index]
+    val card = cards[currentIndex]
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Text(
-            "UČENJE: $setTitle  ${index + 1} / ${cards.size}",
+            text = "UČENJE: $setTitle",
             style = MaterialTheme.typography.titleMedium
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("${currentIndex + 1} / ${cards.size}")
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(220.dp)
                 .clickable { viewModel.revealAnswer() }
         ) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    if (showAnswer) card.answer else card.question,
+                    text = if (showAnswer) card.answer else card.question,
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Button(onClick = viewModel::markKnown) { Text("✅ ZNAM") }
-            Button(onClick = viewModel::markUnknown) { Text("❌ NE ZNAM") }
+            Button(onClick = { viewModel.markKnown() }) {
+                Text("ZNAM")
+            }
+            Button(onClick = { viewModel.markUnknown() }) {
+                Text("NE ZNAM")
+            }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        TextButton(onClick = { showCancelDialog = true }) {
+            Text("Prestani s učenjem")
+        }
+    }
+
+    if (showCancelDialog) {
+        AlertDialog(
+            onDismissRequest = { showCancelDialog = false },
+            title = { Text("Prekid učenja") },
+            text = { Text("Želiš li prekinuti učenje?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showCancelDialog = false
+                        onCancel()
+                    }
+                ) {
+                    Text("Da")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCancelDialog = false }) {
+                    Text("Ne")
+                }
+            }
+        )
     }
 }

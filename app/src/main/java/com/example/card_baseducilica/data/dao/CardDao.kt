@@ -16,4 +16,10 @@ interface CardDao {
 
     @Query("DELETE FROM cards WHERE id = :cardId")
     suspend fun deleteById(cardId: Int)
+
+    @Query("UPDATE cards SET isFavorite = :isFavorite WHERE id = :cardId")
+    suspend fun updateFavorite(cardId: Int, isFavorite: Boolean)
+
+    @Query("SELECT * FROM cards WHERE setId = :setId AND isFavorite = 1")
+    suspend fun getFavoriteCardsForSet(setId: Int): List<CardEntity>
 }

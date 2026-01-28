@@ -16,9 +16,17 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
     private val _cards = MutableStateFlow<List<CardEntity>>(emptyList())
     val cards: StateFlow<List<CardEntity>> = _cards
 
+    private val _showOnlyFavorites = MutableStateFlow(false)
+    val showOnlyFavorites: StateFlow<Boolean> = _showOnlyFavorites
+
     fun loadCards(setId: Int) {
         viewModelScope.launch {
-            _cards.value = cardDao.getCardsForSet(setId)
+            _cards.value =
+                if (_showOnlyFavorites.value) {
+                    cardDao.getFavoriteCardsForSet(setId)
+                } else {
+                    cardDao.getCardsForSet(setId)
+                }
         }
     }
 
@@ -42,5 +50,21 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
             cardDao.deleteById(cardId)
             loadCards(setId)
         }
+    }
+
+    fun toggleFavorite(card: CardEntity) {
+        viewModelScope.launch {
+            cardDao.updateFavorite(
+                cardId = card.id,
+                isFavorite = !card.isFavorite
+            )
+            // ponovno učitaj kartice seta
+            loadCards(card.setId)
+        }
+    }
+
+    fun toggleFavoriteFilter(setId: Int) {
+        _showOnlyFavorites.value = !_showOnlyFavorites.value
+        loadCards(setId)
     }
 }

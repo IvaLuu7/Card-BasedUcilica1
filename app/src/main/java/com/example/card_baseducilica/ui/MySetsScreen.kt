@@ -14,13 +14,30 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.foundation.clickable
 import androidx.navigation.NavController
 import com.example.card_baseducilica.navigation.Routes
+import com.example.card_baseducilica.data.session.SessionManager
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun MySetsScreen(
     navController: NavController,
     setViewModel: SetViewModel = viewModel()
 ) {
-    // privremeni userId
-    val userId = 1
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+
+    // USER ID IZ SESSIONA
+    val userId = sessionManager.getUserId()
+
+    // Ako nema sessiona → vrati na login (sigurnosna mreža)
+    LaunchedEffect(userId) {
+        if (userId == null) {
+            navController.navigate(Routes.LOGIN) {
+                popUpTo(0)
+            }
+        }
+    }
+
+    if (userId == null) return
 
     val sets by setViewModel.sets.collectAsState()
 
@@ -39,6 +56,25 @@ fun MySetsScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
+
+        // LOGOUT GUMB
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(
+                onClick = {
+                    sessionManager.clearSession()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(0)
+                    }
+                }
+            ) {
+                Text("ODJAVA")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = "MOJI SETOVI",
@@ -123,7 +159,7 @@ fun MySetsScreen(
         }
     }
 
-    // ⬇️⬇️ OVO JE KLJUČNO — DIALOG MORA BITI OVDJE ⬇️⬇️
+    // DIALOG ZA DODAVANJE SETA
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
