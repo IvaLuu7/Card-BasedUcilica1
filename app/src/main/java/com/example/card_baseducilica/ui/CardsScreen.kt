@@ -17,8 +17,6 @@ import androidx.navigation.NavController
 import com.example.card_baseducilica.navigation.Routes
 import com.example.card_baseducilica.viewmodel.CardViewModel
 import com.example.card_baseducilica.data.entity.CardEntity
-import android.content.*
-import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun CardsScreen(
@@ -29,7 +27,6 @@ fun CardsScreen(
 ) {
     val showOnlyFavorites by cardViewModel.showOnlyFavorites.collectAsState()
     val cards by cardViewModel.cards.collectAsState()
-    val context = LocalContext.current
 
     var showDialog by remember { mutableStateOf(false) }
     var question by remember { mutableStateOf("") }
@@ -47,10 +44,15 @@ fun CardsScreen(
             .padding(24.dp)
     ) {
 
-        Text("SET: $setTitle", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = "$setTitle",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ➕ DODAJ KARTICU
+        // + Dodaj karticu
         Button(
             onClick = {
                 editingCard = null
@@ -65,22 +67,7 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 📤 EXPORT
-        Button(
-            onClick = {
-                cardViewModel.exportSetAsJson(setTitle) { json ->
-                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("Set JSON", json))
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Export set (kopiraj JSON)")
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // 🎓 UČENJE
+        // Učenje
         Button(
             onClick = {
                 navController.navigate(
@@ -99,11 +86,9 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // ⭐ FILTER
+        // Filter
         OutlinedButton(
-            onClick = {
-                cardViewModel.toggleFavoriteFilter(setId)
-            },
+            onClick = { cardViewModel.toggleFavoriteFilter(setId) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
@@ -150,15 +135,20 @@ fun CardsScreen(
                                         Icons.Filled.Favorite
                                     else
                                         Icons.Filled.FavoriteBorder,
-                                    contentDescription = "Favorit"
+                                    contentDescription = "Favorit",
+                                    tint = if (card.isFavorite)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                 )
                             }
 
                             Box {
-                                IconButton(
-                                    onClick = { expandedMenuForCardId = card.id }
-                                ) {
-                                    Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                                IconButton(onClick = { expandedMenuForCardId = card.id }) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "Menu"
+                                    )
                                 }
 
                                 DropdownMenu(
@@ -201,34 +191,36 @@ fun CardsScreen(
                     OutlinedTextField(
                         value = question,
                         onValueChange = { question = it },
-                        label = { Text("Pitanje") }
+                        label = { Text("Pitanje") },
+                        modifier = Modifier.fillMaxWidth()
                     )
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     OutlinedTextField(
                         value = answer,
                         onValueChange = { answer = it },
-                        label = { Text("Odgovor") }
+                        label = { Text("Odgovor") },
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = {
-                    if (editingCard == null) {
-                        cardViewModel.addCard(setId, question, answer)
-                    } else {
-                        cardViewModel.updateCard(editingCard!!.id, question, answer)
-                        cardViewModel.loadCards(setId)
-                        editingCard = null
+                TextButton(
+                    onClick = {
+                        if (editingCard == null) {
+                            cardViewModel.addCard(setId, question, answer)
+                        } else {
+                            cardViewModel.updateCard(editingCard!!.id, question, answer)
+                            cardViewModel.loadCards(setId)
+                            editingCard = null
+                        }
+                        showDialog = false
                     }
-                    showDialog = false
-                }) {
-                    Text("Spremi")
-                }
+                ) { Text("Spremi") }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Odustani")
-                }
+                TextButton(onClick = { showDialog = false }) { Text("Odustani") }
             }
         )
     }

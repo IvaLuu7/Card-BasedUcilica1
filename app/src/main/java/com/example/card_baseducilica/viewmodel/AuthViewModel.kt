@@ -26,13 +26,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _loginSuccess = MutableStateFlow(false)
     val loginSuccess: StateFlow<Boolean> = _loginSuccess
 
+    private val _registerSuccess = MutableStateFlow(false)
+    val registerSuccess: StateFlow<Boolean> = _registerSuccess
+
     fun login(username: String, password: String) {
         viewModelScope.launch {
             try {
+                _error.value = null
                 val userId: Int = authRepository.login(username, password)
-
                 sessionManager.saveUserId(userId)
-
                 _loginSuccess.value = true
             } catch (e: Exception) {
                 _error.value = e.message
@@ -40,17 +42,22 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun register(
-        username: String,
-        password: String,
-        confirmPassword: String
-    ) {
+    fun register(username: String, password: String, confirmPassword: String) {
         viewModelScope.launch {
             try {
-                authRepository.register(username, password, confirmPassword)
                 _error.value = null
+                _registerSuccess.value = false
+
+                authRepository.register(username, password, confirmPassword)
+
+                // ✅ ako je prošlo, javi UI-u
+                _registerSuccess.value = true
             } catch (e: IllegalArgumentException) {
                 _error.value = e.message
+                _registerSuccess.value = false
+            } catch (e: Exception) {
+                _error.value = "Greška pri registraciji."
+                _registerSuccess.value = false
             }
         }
     }
@@ -58,5 +65,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun checkSession() {
         val userId = sessionManager.getUserId()
         _loginSuccess.value = userId != null
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 }

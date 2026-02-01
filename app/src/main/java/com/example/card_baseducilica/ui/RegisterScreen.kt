@@ -19,6 +19,16 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    val error by authViewModel.error.collectAsState()
+    val registerSuccess by authViewModel.registerSuccess.collectAsState()
+
+    // ✅ Vrati na login SAMO kad je registracija uspješna
+    LaunchedEffect(registerSuccess) {
+        if (registerSuccess) {
+            onBackToLogin()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -27,16 +37,15 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text(
-            text = "REGISTRACIJA",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
+        Text(text = "REGISTRACIJA", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                authViewModel.clearError()
+            },
             label = { Text("Korisničko ime") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -45,7 +54,10 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                authViewModel.clearError()
+            },
             label = { Text("Lozinka") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
@@ -55,11 +67,19 @@ fun RegisterScreen(
 
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = {
+                confirmPassword = it
+                authViewModel.clearError()
+            },
             label = { Text("Potvrdi lozinku") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (error != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = error!!, color = MaterialTheme.colorScheme.error)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -70,7 +90,6 @@ fun RegisterScreen(
                     password = password,
                     confirmPassword = confirmPassword
                 )
-                onBackToLogin()
             },
             modifier = Modifier.fillMaxWidth()
         ) {

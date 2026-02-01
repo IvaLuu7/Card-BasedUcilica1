@@ -29,7 +29,7 @@ fun ImportSetScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        Text("Import seta (JSON)", style = MaterialTheme.typography.headlineMedium)
+        Text("Uvoz seta (JSON)", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(Modifier.height(16.dp))
 
@@ -52,7 +52,7 @@ fun ImportSetScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Import set")
+            Text("Preuzmi set")
         }
     }
 }

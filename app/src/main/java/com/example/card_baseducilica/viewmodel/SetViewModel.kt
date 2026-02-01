@@ -12,7 +12,9 @@ import com.example.card_baseducilica.export.*
 
 class SetViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val setDao = AppDatabase.getInstance(application).setDao()
+    private val db = AppDatabase.getInstance(application)
+    private val setDao = db.setDao()
+    private val cardDao = db.cardDao()
 
     private val _sets = MutableStateFlow<List<SetEntity>>(emptyList())
     val sets: StateFlow<List<SetEntity>> = _sets
@@ -28,8 +30,15 @@ class SetViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addSet(userId: Int, title: String, description: String?) {
         if (title.isBlank()) return
+
         viewModelScope.launch {
-            setDao.insert(SetEntity(userId = userId, title = title, description = description))
+            setDao.insert(
+                SetEntity(
+                    userId = userId,
+                    title = title,
+                    description = description
+                )
+            )
             loadSets(userId)
         }
     }
@@ -44,24 +53,61 @@ class SetViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSet(setId: Int, title: String, description: String) {
         viewModelScope.launch {
             setDao.updateSet(setId, title, description)
-            currentUserId?.let { loadSets(it) }   // 🔥 AUTOMATSKI REFRESH
+            currentUserId?.let { loadSets(it) } // refresh odmah
         }
     }
 
-    fun importSetFromJson(userId: Int, json: String, cardViewModel: CardViewModel) {
+    fun importSetFromJson(
+        userId: Int,
+        json: String,
+        cardViewModel: CardViewModel
+    ) {
         viewModelScope.launch {
             try {
                 val parsed = JsonImporter.fromJson(json)
+
                 val newSetId = setDao.insertSetAndReturnId(
-                    SetEntity(userId = userId, title = parsed.title, description = "Importirano")
+                    SetEntity(
+                        userId = userId,
+                        title = parsed.title,
+                        description = "Preuzet set"
+                    )
                 ).toInt()
 
                 parsed.cards.forEach { card ->
-                    cardViewModel.addCard(newSetId, card.question, card.answer)
+                    cardViewModel.addCard(
+                        setId = newSetId,
+                        question = card.question,
+                        answer = card.answer
+                    )
                 }
 
                 loadSets(userId)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
+    // EXPORT JSON ZA SET (koristi se u tri točkice na MySetsScreen)
+    fun exportSetAsJson(setId: Int, setTitle: String, onResult: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val cards = cardDao.getCardsForSet(setId)
+
+                val exportData = SetExportDto(
+                    title = setTitle,
+                    cards = cards.map {
+                        CardExportDto(
+                            question = it.question,
+                            answer = it.answer,
+                            isFavorite = it.isFavorite
+                        )
+                    }
+                )
+
+                val json = JsonExporter.toJson(exportData)
+                onResult(json)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
