@@ -60,7 +60,7 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
                 cardId = card.id,
                 isFavorite = !card.isFavorite
             )
-            // ponovno učitaj kartice seta
+
             loadCards(card.setId)
         }
     }

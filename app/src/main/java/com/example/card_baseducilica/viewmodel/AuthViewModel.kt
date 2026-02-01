@@ -50,7 +50,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
                 authRepository.register(username, password, confirmPassword)
 
-                // ✅ ako je prošlo, javi UI-u
+
                 _registerSuccess.value = true
             } catch (e: IllegalArgumentException) {
                 _error.value = e.message

@@ -13,7 +13,7 @@ private val LightColors = lightColorScheme(
     background = BackgroundLight,
     surface = SurfaceLight,
 
-    onPrimary = Color.White,     // tekst na gumbima
+    onPrimary = Color.White,
     onSecondary = TextPrimary,
     onTertiary = TextPrimary,
 

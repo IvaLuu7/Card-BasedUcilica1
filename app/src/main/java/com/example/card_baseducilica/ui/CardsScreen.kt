@@ -52,7 +52,7 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // + Dodaj karticu
+
         Button(
             onClick = {
                 editingCard = null
@@ -67,7 +67,7 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Učenje
+
         Button(
             onClick = {
                 navController.navigate(
@@ -86,7 +86,7 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Filter
+
         OutlinedButton(
             onClick = { cardViewModel.toggleFavoriteFilter(setId) },
             modifier = Modifier.fillMaxWidth()

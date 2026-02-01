@@ -2,6 +2,7 @@ package com.example.card_baseducilica.data
 
 import com.example.card_baseducilica.data.dao.UserDao
 import com.example.card_baseducilica.data.entity.UserEntity
+import com.example.card_baseducilica.data.util.PasswordHasher
 
 class AuthRepository(
     private val userDao: UserDao
@@ -15,7 +16,10 @@ class AuthRepository(
             throw IllegalArgumentException("Unesi korisničko ime i lozinku.")
         }
 
-        val userId = userDao.login(u, p)
+
+        val hashedPassword = PasswordHasher.sha256(p)
+
+        val userId = userDao.login(u, hashedPassword)
         return userId ?: throw IllegalArgumentException("Pogrešno korisničko ime ili lozinka.")
     }
 
@@ -31,12 +35,19 @@ class AuthRepository(
             throw IllegalArgumentException("Lozinke se ne podudaraju.")
         }
 
-        // ✅ provjera postoji li username
+
         val existing = userDao.getByUsername(u)
         if (existing != null) {
             throw IllegalArgumentException("Korisničko ime već postoji.")
         }
 
-        userDao.insert(UserEntity(username = u, password = p))
+        val hashedPassword = PasswordHasher.sha256(p)
+
+        userDao.insert(
+            UserEntity(
+                username = u,
+                password = hashedPassword
+            )
+        )
     }
 }

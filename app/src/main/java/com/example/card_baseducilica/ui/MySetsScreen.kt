@@ -48,7 +48,7 @@ fun MySetsScreen(
             .padding(24.dp)
     ) {
 
-        // LOGOUT gore desno
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -73,7 +73,7 @@ fun MySetsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // + Dodaj set
+
         Button(
             onClick = {
                 editingSet = null
@@ -86,7 +86,7 @@ fun MySetsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Import set
+
         OutlinedButton(
             onClick = { navController.navigate(Routes.IMPORT_SET) },
             modifier = Modifier.fillMaxWidth()
@@ -137,7 +137,7 @@ fun MySetsScreen(
                                     onDismissRequest = { expandedMenuForSetId = null }
                                 ) {
 
-                                    // 1) EXPORT (prvi)
+
                                     DropdownMenuItem(
                                         text = { Text("Dijeli set") },
                                         onClick = {
@@ -151,7 +151,7 @@ fun MySetsScreen(
                                         }
                                     )
 
-                                    // 2) UREDI
+
                                     DropdownMenuItem(
                                         text = { Text("Uredi") },
                                         onClick = {
@@ -163,7 +163,7 @@ fun MySetsScreen(
                                         }
                                     )
 
-                                    // 3) OBRIŠI
+
                                     DropdownMenuItem(
                                         text = { Text("Obriši") },
                                         onClick = {
@@ -180,7 +180,7 @@ fun MySetsScreen(
         }
     }
 
-    // Dialog za dodaj/uredi set
+
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },

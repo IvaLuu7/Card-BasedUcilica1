@@ -89,7 +89,7 @@ class SetViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // EXPORT JSON ZA SET (koristi se u tri točkice na MySetsScreen)
+
     fun exportSetAsJson(setId: Int, setTitle: String, onResult: (String) -> Unit) {
         viewModelScope.launch {
             try {

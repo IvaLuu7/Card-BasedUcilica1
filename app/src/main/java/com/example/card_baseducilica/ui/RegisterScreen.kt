@@ -22,7 +22,7 @@ fun RegisterScreen(
     val error by authViewModel.error.collectAsState()
     val registerSuccess by authViewModel.registerSuccess.collectAsState()
 
-    // ✅ Vrati na login SAMO kad je registracija uspješna
+
     LaunchedEffect(registerSuccess) {
         if (registerSuccess) {
             onBackToLogin()
