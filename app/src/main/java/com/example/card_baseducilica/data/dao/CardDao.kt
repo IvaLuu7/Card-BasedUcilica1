@@ -22,4 +22,8 @@ interface CardDao {
 
     @Query("SELECT * FROM cards WHERE setId = :setId AND isFavorite = 1")
     suspend fun getFavoriteCardsForSet(setId: Int): List<CardEntity>
+
+    @Query("UPDATE cards SET question = :question, answer = :answer WHERE id = :cardId")
+    suspend fun updateCard(cardId: Int, question: String, answer: String)
+
 }

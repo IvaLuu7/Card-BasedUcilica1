@@ -16,6 +16,8 @@ object Routes {
     const val CARDS_ROUTE = "cards"
     const val LEARNING = "learning"
     const val RESULT = "result"
+    const val IMPORT_SET = "import_set"
+
 }
 
 @Composable
@@ -120,5 +122,10 @@ fun AppNavGraph() {
                 }
             )
         }
+
+        composable(Routes.IMPORT_SET) {
+            ImportSetScreen(navController)
+        }
+
     }
 }

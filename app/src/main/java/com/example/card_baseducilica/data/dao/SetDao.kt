@@ -16,4 +16,11 @@ interface SetDao {
 
     @Query("DELETE FROM sets WHERE id = :setId")
     suspend fun deleteById(setId: Int)
+
+    @Insert
+    suspend fun insertSetAndReturnId(set: SetEntity): Long
+
+    @Query("UPDATE sets SET title = :title, description = :description WHERE id = :setId")
+    suspend fun updateSet(setId: Int, title: String, description: String)
+
 }

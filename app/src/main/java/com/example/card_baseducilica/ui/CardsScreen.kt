@@ -16,6 +16,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.card_baseducilica.navigation.Routes
 import com.example.card_baseducilica.viewmodel.CardViewModel
+import com.example.card_baseducilica.data.entity.CardEntity
+import android.content.*
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun CardsScreen(
@@ -26,10 +29,12 @@ fun CardsScreen(
 ) {
     val showOnlyFavorites by cardViewModel.showOnlyFavorites.collectAsState()
     val cards by cardViewModel.cards.collectAsState()
+    val context = LocalContext.current
 
     var showDialog by remember { mutableStateOf(false) }
     var question by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf("") }
+    var editingCard by remember { mutableStateOf<CardEntity?>(null) }
     var expandedMenuForCardId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
@@ -42,15 +47,17 @@ fun CardsScreen(
             .padding(24.dp)
     ) {
 
-        Text(
-            text = "SET: $setTitle",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
+        Text("SET: $setTitle", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
+        // ➕ DODAJ KARTICU
         Button(
-            onClick = { showDialog = true },
+            onClick = {
+                editingCard = null
+                question = ""
+                answer = ""
+                showDialog = true
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("+ Dodaj karticu")
@@ -58,6 +65,22 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // 📤 EXPORT
+        Button(
+            onClick = {
+                cardViewModel.exportSetAsJson(setTitle) { json ->
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("Set JSON", json))
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Export set (kopiraj JSON)")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // 🎓 UČENJE
         Button(
             onClick = {
                 navController.navigate(
@@ -76,6 +99,7 @@ fun CardsScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // ⭐ FILTER
         OutlinedButton(
             onClick = {
                 cardViewModel.toggleFavoriteFilter(setId)
@@ -134,10 +158,7 @@ fun CardsScreen(
                                 IconButton(
                                     onClick = { expandedMenuForCardId = card.id }
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "Menu"
-                                    )
+                                    Icon(Icons.Default.MoreVert, contentDescription = "Menu")
                                 }
 
                                 DropdownMenu(
@@ -145,12 +166,20 @@ fun CardsScreen(
                                     onDismissRequest = { expandedMenuForCardId = null }
                                 ) {
                                     DropdownMenuItem(
+                                        text = { Text("Uredi") },
+                                        onClick = {
+                                            editingCard = card
+                                            question = card.question
+                                            answer = card.answer
+                                            showDialog = true
+                                            expandedMenuForCardId = null
+                                        }
+                                    )
+
+                                    DropdownMenuItem(
                                         text = { Text("Obriši") },
                                         onClick = {
-                                            cardViewModel.deleteCard(
-                                                cardId = card.id,
-                                                setId = setId
-                                            )
+                                            cardViewModel.deleteCard(card.id, setId)
                                             expandedMenuForCardId = null
                                         }
                                     )
@@ -166,39 +195,33 @@ fun CardsScreen(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Nova kartica") },
+            title = { Text(if (editingCard == null) "Nova kartica" else "Uredi karticu") },
             text = {
                 Column {
                     OutlinedTextField(
                         value = question,
                         onValueChange = { question = it },
-                        label = { Text("Pitanje") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Pitanje") }
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     OutlinedTextField(
                         value = answer,
                         onValueChange = { answer = it },
-                        label = { Text("Odgovor") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = { Text("Odgovor") }
                     )
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        cardViewModel.addCard(
-                            setId = setId,
-                            question = question,
-                            answer = answer
-                        )
-                        question = ""
-                        answer = ""
-                        showDialog = false
+                TextButton(onClick = {
+                    if (editingCard == null) {
+                        cardViewModel.addCard(setId, question, answer)
+                    } else {
+                        cardViewModel.updateCard(editingCard!!.id, question, answer)
+                        cardViewModel.loadCards(setId)
+                        editingCard = null
                     }
-                ) {
+                    showDialog = false
+                }) {
                     Text("Spremi")
                 }
             },

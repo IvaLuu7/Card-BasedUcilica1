@@ -8,6 +8,8 @@ import com.example.card_baseducilica.data.entity.CardEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.example.card_baseducilica.export.*
+
 
 class CardViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -67,4 +69,29 @@ class CardViewModel(application: Application) : AndroidViewModel(application) {
         _showOnlyFavorites.value = !_showOnlyFavorites.value
         loadCards(setId)
     }
+
+    fun exportSetAsJson(setTitle: String, onResult: (String) -> Unit) {
+        val currentCards = cards.value
+
+        val exportData = SetExportDto(
+            title = setTitle,
+            cards = currentCards.map {
+                CardExportDto(
+                    question = it.question,
+                    answer = it.answer,
+                    isFavorite = it.isFavorite
+                )
+            }
+        )
+
+        val json = JsonExporter.toJson(exportData)
+        onResult(json)
+    }
+    fun updateCard(cardId: Int, question: String, answer: String) {
+        viewModelScope.launch {
+            cardDao.updateCard(cardId, question, answer)
+        }
+    }
+
+
 }
