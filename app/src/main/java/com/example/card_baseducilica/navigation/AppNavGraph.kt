@@ -2,7 +2,6 @@ package com.example.card_baseducilica.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -23,8 +22,6 @@ object Routes {
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    val learningViewModel: LearningViewModel =
-        androidx.lifecycle.viewmodel.compose.viewModel()
 
     NavHost(
         navController = navController,

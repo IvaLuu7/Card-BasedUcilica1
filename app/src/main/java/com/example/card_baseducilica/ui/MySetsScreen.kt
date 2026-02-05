@@ -120,7 +120,7 @@ fun MySetsScreen(
                                 )
                                 if (!set.description.isNullOrBlank()) {
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Text(set.description!!)
+                                    Text(set.description)
                                 }
                             }
 

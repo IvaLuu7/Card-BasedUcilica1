@@ -53,7 +53,7 @@ class SetViewModel(application: Application) : AndroidViewModel(application) {
     fun updateSet(setId: Int, title: String, description: String) {
         viewModelScope.launch {
             setDao.updateSet(setId, title, description)
-            currentUserId?.let { loadSets(it) } // refresh odmah
+            currentUserId?.let { loadSets(it) }
         }
     }
 

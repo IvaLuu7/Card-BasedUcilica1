@@ -57,7 +57,8 @@ fun LearningScreen(
 
         Text(
             text = "UČENJE: $setTitle",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(8.dp))

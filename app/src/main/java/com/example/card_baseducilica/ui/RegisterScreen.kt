@@ -37,7 +37,7 @@ fun RegisterScreen(
         verticalArrangement = Arrangement.Center
     ) {
 
-        Text(text = "REGISTRACIJA", style = MaterialTheme.typography.headlineMedium)
+        Text(text = "REGISTRACIJA", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
         Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(

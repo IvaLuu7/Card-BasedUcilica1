@@ -60,12 +60,9 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    // ROOM – lokalna baza podataka
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
-
-    // DATASTORE – pamti prijavljenog korisnika
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("com.google.code.gson:gson:2.11.0")
